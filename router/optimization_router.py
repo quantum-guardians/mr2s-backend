@@ -91,7 +91,7 @@ async def optimize_graph_direction_goodgood_meathod(request: RequestDto):
         bidirectional_score = calculate_total_apsp_distance(
           vertex_set,
           original_edges_tuples,
-          is_directed=True
+          is_directed=False
         )
 
         return ResponseDto(

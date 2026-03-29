@@ -1,9 +1,10 @@
 from typing import Dict, Set, Tuple, List
 
-from dimod import BinaryPolynomial, Vartype
+from dimod import BinaryPolynomial, Vartype, SampleSet
 from dto.ResponseDto import EdgeDto
 from service.graph_utils import to_canonical_edges, extract_vertices, to_adjacency_dict
 from service.qubo_utils import solve_binary_polynomial, multiply_polys
+from service.graph_analyzer import calculate_total_apsp_distance
 
 def _get_indicator_function(i: int, j: int) -> BinaryPolynomial:
   if i == j:
@@ -68,7 +69,7 @@ def _build_polynomial(
 
 def _process_solution(
     best_sample: Dict[str, int], canonical_edges: Set[Tuple[int, int]]
-) -> list[EdgeDto]:
+) -> list[tuple[int, int]]:
     """
     Processes the best sample from the solver into a list of directed EdgeDto objects.
     """
@@ -76,18 +77,34 @@ def _process_solution(
     for u_canon, v_canon in canonical_edges:
         var_name = f"e_{u_canon}_{v_canon}"
         if best_sample.get(var_name, 0) == 1:
-            final_edges.append(EdgeDto(_from=v_canon, to=u_canon))
+            final_edges.append((v_canon, u_canon))
         else:
-            final_edges.append(EdgeDto(_from=u_canon, to=v_canon))
+            final_edges.append((u_canon, v_canon))
     return final_edges
+
+def _select_best_sample(
+    sample_set: SampleSet,
+    canonical_edges: Set[Tuple[int, int]],
+    vertices: set[int]
+) -> list[tuple[int, int]]:
+
+  def get_effective_score(tuples: list[tuple[int, int]]):
+    score = calculate_total_apsp_distance(vertices, tuples, True)
+    return float('inf') if score == -1 else score
+
+  return min(
+    map(lambda sample: _process_solution(sample, canonical_edges), sample_set.samples()),
+    key=get_effective_score
+  )
+
 
 # --- Public Service Function ---
 
 def solve_direction_optimization_small_world(
-    vertices: list[int],
+    vertices: set[int],
     edges: list[list[int]],
     use_3hop: bool = True
-) -> list[EdgeDto]:
+) -> list[tuple[int, int]]:
     """
     Orchestrates the graph direction optimization process using the 'small-world' model.
     """
@@ -95,10 +112,9 @@ def solve_direction_optimization_small_world(
         return []
 
     canonical_edges = to_canonical_edges(edges)
-    vertex_set = extract_vertices(edges, vertices)
     adj = to_adjacency_dict(canonical_edges)
 
-    binary_polynomial = _build_polynomial(vertex_set, adj, use_3hop)
+    binary_polynomial = _build_polynomial(vertices, adj, use_3hop)
 
-    best_sample = solve_binary_polynomial(binary_polynomial)
-    return _process_solution(best_sample, canonical_edges)
+    sample_set = solve_binary_polynomial(binary_polynomial)
+    return _select_best_sample(sample_set, canonical_edges, vertices)

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List
 
+from service.graph_analyzer import calculate_total_apsp_distance
+
 @dataclass
 class EdgeDto:
     _from: int
@@ -11,3 +13,21 @@ class ResponseDto:
     edges: List[EdgeDto]
     optimized_graph_score: float
     bidirectional_graph_score: float
+
+    def from_tuples(vertices: list[int], tuples: list[tuple[int, int]]) -> "ResponseDto":
+
+      optimized_score = calculate_total_apsp_distance(
+        vertices, tuples, is_directed=True
+      )
+
+      bidirectional_score = calculate_total_apsp_distance(
+        vertices, tuples, is_directed=False
+      )
+
+      edges = map(lambda x: EdgeDto(_from = x[0], to = x[1]), tuples)
+
+      return ResponseDto(
+        edges=edges,
+        optimized_graph_score=optimized_score,
+        bidirectional_graph_score=bidirectional_score
+      )

@@ -1,6 +1,4 @@
 from fastapi import APIRouter, HTTPException
-import networkx as nx
-from typing import List, Set
 import itertools
 
 from dto import RequestDto, ResponseDto, EdgeDto

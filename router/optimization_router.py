@@ -24,17 +24,17 @@ async def optimize_graph_direction(request: RequestDto):
      bidirectional graph for comparison.
   4. Returns the final response including the graph and scores.
   """
-  # try:
-  vertices_set = extract_vertices(request.edges, request.vertices)
-  tuples = solve_direction_optimization_small_world(vertices_set, request.edges)
-  return ResponseDto.from_tuples(request.vertices, tuples)
-
-  # except ValueError as e:
-  #   raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
-  # except Exception as e:
-  #   raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
+  try:
+    vertices_set = extract_vertices(request.edges, request.vertices)
+    tuples = solve_direction_optimization_small_world(vertices_set, request.edges)
+    return ResponseDto.from_tuples(request.vertices, tuples)
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
 
 @router.post("/optimize/naoto", response_model=ResponseDto)
+async def optimize_graph_direction_goodgood_meathod(request: RequestDto):
 async def optimize_graph_direction_goodgood_meathod(request: RequestDto):
     """
     API endpoint to optimize graph edge directions using the 'goodgood' method.

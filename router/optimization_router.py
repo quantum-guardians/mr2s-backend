@@ -1,14 +1,15 @@
 from fastapi import APIRouter, HTTPException
 import networkx as nx
 from typing import List, Set
-
-from dto.RequestDto import RequestDto
-from dto.ResponseDto import ResponseDto, EdgeDto
-from service.small_world_service import SmallWorldService
-from service.graph_analyzer import calculate_total_apsp_distance
-from service.naoto_service import optimize_edge_orientations
-from service.graph_utils import extract_vertices
 import itertools
+
+from dto import RequestDto, ResponseDto, EdgeDto
+from service import (
+    SmallWorldService,
+    calculate_total_apsp_distance,
+    optimize_edge_orientations,
+    extract_vertices
+)
 
 router = APIRouter()
 

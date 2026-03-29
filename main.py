@@ -1,6 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
-from router.optimization_router import router as optimization_router
+from router import optimization_router
 
 app = FastAPI()
 

@@ -104,6 +104,5 @@ def solve_direction_optimization_small_world(
 
     binary_polynomial = _build_polynomial(vertex_set, adj, use_3hop)
 
-    num_reads = 100
     best_sample = solve_binary_polynomial(binary_polynomial)
     return _process_solution(best_sample, canonical_edges)

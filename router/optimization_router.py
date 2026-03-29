@@ -4,7 +4,7 @@ from typing import List, Set
 
 from dto.RequestDto import RequestDto
 from dto.ResponseDto import ResponseDto, EdgeDto
-from service.optimization_service_small_world import solve_direction_optimization_small_world
+from service.small_world_service import solve_direction_optimization_small_world
 from service.graph_analyzer import calculate_total_apsp_distance
 from service.naoto_service import optimize_edge_orientations
 import itertools

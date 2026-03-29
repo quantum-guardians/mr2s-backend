@@ -24,7 +24,7 @@ class ResponseDto:
         vertices, tuples, is_directed=False
       )
 
-      edges = map(lambda x: EdgeDto(_from = x[0], to = x[1]), tuples)
+      edges = [EdgeDto(_from=x[0], to=x[1]) for x in tuples]
 
       return ResponseDto(
         edges=edges,

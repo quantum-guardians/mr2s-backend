@@ -70,7 +70,10 @@ def _process_solution(
     best_sample: Dict[str, int], canonical_edges: Set[Tuple[int, int]]
 ) -> list[tuple[int, int]]:
     """
-    Processes the best sample from the solver into a list of directed EdgeDto objects.
+    Processes the best sample from the solver into a list of directed edge tuples.
+
+    Returns:
+        list[tuple[int, int]]: Directed edges represented as (u, v) integer node ID pairs.
     """
     final_edges = []
     for u_canon, v_canon in canonical_edges:

@@ -1,14 +1,10 @@
 from typing import Dict, Set, Tuple, List
 
 from dimod import BinaryPolynomial, Vartype, SampleSet
-from . import (
-    to_canonical_edges,
-    to_adjacency_dict,
-    solve_binary_polynomial,
-    multiply_polys,
-    calculate_total_apsp_distance,
-    OptimizationService
-)
+from .graph_utils import to_canonical_edges, to_adjacency_dict
+from .qubo_utils import solve_binary_polynomial, multiply_polys
+from .graph_analyzer import calculate_total_apsp_distance
+from .optimization_service import OptimizationService
 
 class SmallWorldService(OptimizationService):
 

@@ -1,22 +1,18 @@
-from collections import defaultdict
-import itertools
 from typing import Dict, Set, Tuple, List
 
-import dimod.typing
 from dimod import BinaryPolynomial, Vartype
-from dwave.samplers import SimulatedAnnealingSampler
 from dto.ResponseDto import EdgeDto
 from service.graph_utils import to_canonical_edges, extract_vertices, to_adjacency_dict
 from service.qubo_utils import solve_binary_polynomial, multiply_polys
 
-def _get_indicator_function(i: int, j: int) -> dimod.BinaryPolynomial:
+def _get_indicator_function(i: int, j: int) -> BinaryPolynomial:
   if i == j:
     raise ValueError(f"i and j must be different, but both are {i}")
 
   if (i < j):
-    return dimod.BinaryPolynomial({(): 1, (f'e_{i}_{j}', ): -1}, Vartype.BINARY)
+    return BinaryPolynomial({(): 1, (f'e_{i}_{j}', ): -1}, Vartype.BINARY)
   else:
-    return dimod.BinaryPolynomial({(f'e_{j}_{i}',): 1}, Vartype.BINARY)
+    return BinaryPolynomial({(f'e_{j}_{i}',): 1}, Vartype.BINARY)
 
 
 def _get_2_hop_polynomial(

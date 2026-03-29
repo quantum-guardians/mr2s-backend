@@ -1,5 +1,4 @@
-import dimod
-from dimod import BinaryPolynomial
+from dimod import BinaryPolynomial, SampleSet, make_quadratic, BINARY
 from dwave.samplers import SimulatedAnnealingSampler
 
 sampler = SimulatedAnnealingSampler()
@@ -7,7 +6,7 @@ sampler = SimulatedAnnealingSampler()
 def solve_binary_polynomial(
     polynomial: BinaryPolynomial,
     num_reads: int = 100
-) -> dict[str, int]:
+) -> SampleSet:
   """
   Solves the given QUBO problem using a simulated annealer.
   """
@@ -16,10 +15,9 @@ def solve_binary_polynomial(
 
   # 2. 보통 최대 계수의 1.5 ~ 2배 정도를 주면 안전합니다.
   # 이 값을 strength로 전달합니다.
-  bqm = dimod.make_quadratic(polynomial, strength=max_coeff * 2.0, vartype=dimod.BINARY)
+  bqm = make_quadratic(polynomial, strength=max_coeff * 2.0, vartype=BINARY)
 
-  sampleset = sampler.sample(bqm, num_reads=num_reads)
-  return sampleset.first.sample
+  return sampler.sample(bqm, num_reads=num_reads)
 
 def multiply_polys(
     poly1: BinaryPolynomial,
@@ -37,4 +35,4 @@ def multiply_polys(
       else:
         new_data[new_term] = new_coef
 
-  return dimod.BinaryPolynomial(new_data, dimod.BINARY)
+  return BinaryPolynomial(new_data, BINARY)

@@ -1,6 +1,6 @@
 from dimod import BinaryPolynomial, Vartype, SampleSet
 
-from domain.weighted_graph import WeightedGraph, AdjEntry, WeightedEdge
+from domain import WeightedGraph, AdjEntry, WeightedEdge
 from .qubo_utils import solve_binary_polynomial, multiply_polys
 from .graph_analyzer import calculate_total_apsp_distance
 from .optimization_service import WeightedOptimizationService

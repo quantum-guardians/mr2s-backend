@@ -105,7 +105,6 @@ class SmallWorldService(OptimizationService):
 
 
   # --- Public Service Function ---
-
   def optimize(
       self,
       vertices: set[int],

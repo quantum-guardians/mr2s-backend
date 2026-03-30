@@ -1,10 +1,11 @@
 import uvicorn
 from fastapi import FastAPI
-from router import optimization_router
+from router import optimization_router, optimization_v1_router
 
 app = FastAPI()
 
 app.include_router(optimization_router)
+app.include_router(optimization_v1_router)
 
 @app.get("/")
 async def root():

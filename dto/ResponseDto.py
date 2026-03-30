@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from service.graph_analyzer import calculate_total_apsp_distance
+from service import calculate_total_apsp_distance
 
 @dataclass
 class EdgeDto:

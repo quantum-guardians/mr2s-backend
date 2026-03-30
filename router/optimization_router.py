@@ -1,16 +1,17 @@
 from fastapi import APIRouter, HTTPException
-import networkx as nx
-from typing import List, Set
-
-from dto.RequestDto import RequestDto
-from dto.ResponseDto import ResponseDto, EdgeDto
-from service.small_world_service import solve_direction_optimization_small_world
-from service.graph_analyzer import calculate_total_apsp_distance
-from service.naoto_service import optimize_edge_orientations
-from service.graph_utils import extract_vertices
 import itertools
 
+from dto import RequestDto, ResponseDto, EdgeDto
+from service import (
+    SmallWorldService,
+    calculate_total_apsp_distance,
+    optimize_edge_orientations,
+    extract_vertices
+)
+
 router = APIRouter()
+
+small_world_service = SmallWorldService()
 
 @router.post("/optimize/small-world", response_model=ResponseDto)
 async def optimize_graph_direction(request: RequestDto):
@@ -26,7 +27,7 @@ async def optimize_graph_direction(request: RequestDto):
   """
   try:
     vertices_set = extract_vertices(request.edges, request.vertices)
-    tuples = solve_direction_optimization_small_world(vertices_set, request.edges)
+    tuples = small_world_service.optimize(vertices_set, request.edges)
     return ResponseDto.from_tuples(request.vertices, tuples)
   except ValueError as e:
     raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
@@ -34,7 +35,6 @@ async def optimize_graph_direction(request: RequestDto):
     raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
 
 @router.post("/optimize/naoto", response_model=ResponseDto)
-async def optimize_graph_direction_goodgood_meathod(request: RequestDto):
 async def optimize_graph_direction_goodgood_meathod(request: RequestDto):
     """
     API endpoint to optimize graph edge directions using the 'goodgood' method.

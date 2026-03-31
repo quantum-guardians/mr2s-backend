@@ -14,6 +14,7 @@ class ResponseDto:
     optimized_graph_score: float
     bidirectional_graph_score: float
 
+    @staticmethod
     def from_tuples(vertices: list[int], tuples: list[tuple[int, int]]) -> "ResponseDto":
 
       optimized_score = calculate_total_apsp_distance(

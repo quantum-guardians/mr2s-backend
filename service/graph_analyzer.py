@@ -1,8 +1,7 @@
 import networkx as nx
-from typing import List, Tuple, Set
 
 def calculate_total_apsp_distance(
-    vertices: Set[int], edges: List[Tuple[int, int]], is_directed: bool
+    vertices: set[int], edges: list[tuple[int, int]], is_directed: bool
 ) -> float:
     """
     Calculates the sum of all-pairs shortest path (APSP) lengths for a given graph.

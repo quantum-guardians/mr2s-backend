@@ -2,6 +2,7 @@ from importlib import import_module
 from typing import Any
 
 __all__ = [
+    "WeightedSmallWorldService",
     "OptimizationService",
     "SmallWorldService",
     "optimize_edge_orientations",
@@ -16,6 +17,7 @@ __all__ = [
 ]
 
 _MODULE_ATTRS = {
+    "WeightedSmallWorldService": (".weighted_small_world_service", "WeightedSmallWorldService"),
     "OptimizationService": (".optimization_service", "OptimizationService"),
     "SmallWorldService": (".small_world_service", "SmallWorldService"),
     "optimize_edge_orientations": (".naoto_service", "optimize_edge_orientations"),

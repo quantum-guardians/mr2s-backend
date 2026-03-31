@@ -4,14 +4,14 @@ from typing import NamedTuple
 
 @dataclass
 class WeightedEdge:
-  vertices: list[int]
+  vertices: list[int] # Only use 0, 1 index for origin to destination
   weight: int
 
   def to_key(self) -> str:
     return f"e_{min(self.vertices)}_{max(self.vertices)}"
 
 class AdjEntry(NamedTuple):
-  vertex: int
+  vertex: int # Could be destination or origin vertex
   weight: int
 
 @dataclass

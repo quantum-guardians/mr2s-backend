@@ -36,3 +36,20 @@ def multiply_polys(
         new_data[new_term] = new_coef
 
   return BinaryPolynomial(new_data, BINARY)
+
+def add_polys(poly1: BinaryPolynomial, poly2: BinaryPolynomial) -> BinaryPolynomial:
+  # 1. 첫 번째 다항식의 항들을 복사 (기본 베이스)
+  combined_data = dict(poly1.items())
+
+  # 2. 두 번째 다항식의 항들을 하나씩 꺼내서 더함
+  for term, coeff in poly2.items():
+    if term in combined_data:
+      combined_data[term] += coeff # 기존 항이 있으면 계수 합산
+    else:
+      combined_data[term] = coeff  # 없으면 새로 추가
+
+  # 3. (선택 사항) 계수가 0인 항 정리 (유령 항 제거)
+  # 너무 작은 값(부동소수점 오차)은 아예 삭제해서 깔끔하게 만듦
+  cleaned_data = {t: c for t, c in combined_data.items() if abs(c) > 1e-12}
+
+  return BinaryPolynomial(cleaned_data, poly1.vartype)

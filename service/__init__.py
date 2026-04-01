@@ -14,12 +14,16 @@ __all__ = [
     "to_adjacency_dict",
     "solve_binary_polynomial",
     "multiply_polys",
+    "SmallWorldSpec",
+    "NHop",
 ]
 
 _MODULE_ATTRS = {
     "WeightedSmallWorldService": (".weighted_small_world_service", "WeightedSmallWorldService"),
     "OptimizationService": (".optimization_service", "OptimizationService"),
     "SmallWorldService": (".small_world_service", "SmallWorldService"),
+    "SmallWorldSpec": (".small_world_service", "SmallWorldSpec"),
+    "NHop": (".small_world_service", "NHop"),
     "optimize_edge_orientations": (".naoto_service", "optimize_edge_orientations"),
     "generate_connected_graph": (".naoto_service", "generate_connected_graph"),
     "compute_planar_faces": (".naoto_service", "compute_planar_faces"),

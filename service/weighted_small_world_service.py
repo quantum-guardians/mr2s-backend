@@ -1,12 +1,24 @@
 from dimod import BinaryPolynomial, Vartype, SampleSet
+from dataclasses import dataclass
 
 from domain import WeightedGraph, AdjEntry, WeightedEdge
-from .qubo_utils import solve_binary_polynomial, multiply_polys
+from .qubo_utils import solve_binary_polynomial, multiply_polys, add_polys
 from .graph_analyzer import calculate_total_apsp_distance
 from .optimization_service import WeightedOptimizationService
 
+@dataclass
+class NHop:
+  n: int
+  weight: int
 
+@dataclass
+class SmallWorldSpec:
+  n_hops: list[NHop]
+
+@dataclass
 class WeightedSmallWorldService(WeightedOptimizationService):
+
+  small_world_spec: SmallWorldSpec
 
   def _get_indicator_function(self, i: int, j: int, weight: int) -> BinaryPolynomial:
     if i == j:
@@ -17,57 +29,55 @@ class WeightedSmallWorldService(WeightedOptimizationService):
     else:
       return BinaryPolynomial({(f'e_{j}_{i}',): weight}, Vartype.BINARY)
 
-
-  def _get_2_hop_polynomial(
-      self, vertices: set[int], adj: dict[int, list[AdjEntry]]
+  def _get_n_hop_polynomial(
+      self,
+      n: int,
+      last_vertex: int,
+      adj: dict[int, list[AdjEntry]],
+      used_vertices: set[int],
+      current_polynomial: BinaryPolynomial
   ) -> BinaryPolynomial:
-    term2_polynomial = BinaryPolynomial({}, Vartype.BINARY)
-    for i in vertices:
-      for k_entry in adj.get(i, []):
-        for j_entry in adj.get(k_entry.vertex, []):
-          if i == j_entry.vertex:
-            continue
-          # 모든 i -> k -> j
-          temp: BinaryPolynomial = multiply_polys(
-            self._get_indicator_function(i, k_entry.vertex, k_entry.weight),
-            self._get_indicator_function(k_entry.vertex, j_entry.vertex, j_entry.weight)
-          )
-          temp.scale(-1)
+    if n == 0: return current_polynomial
 
-          term2_polynomial.update(temp)
+    term_n = BinaryPolynomial({}, Vartype.BINARY)
 
-    return term2_polynomial
+    for entry in adj.get(last_vertex, []):
+      if entry.vertex in used_vertices: continue
 
-  def _get_3_hop_polynomial(
-      self, vertices: set[int], adj: dict[int, list[AdjEntry]]
+      used_vertices.add(entry.vertex)
+      step_poly = self._get_indicator_function(last_vertex, entry.vertex, entry.weight)
+      temp = self._get_n_hop_polynomial(n-1, entry.vertex, adj, used_vertices, step_poly)
+      term_n = add_polys(term_n, temp)
+      used_vertices.remove(entry.vertex)
+
+    return multiply_polys(term_n, current_polynomial)
+
+  def _get_total_n_hop_polynomial(
+      self,
+      n_hop: NHop,
+      vertices: set[int],
+      adj: dict[int, list[AdjEntry]]
   ) -> BinaryPolynomial:
-    term3_polynomial = BinaryPolynomial({}, Vartype.BINARY)
-    for i in vertices:
-      for j_entry in adj.get(i, []):
-        for k_entry in adj.get(j_entry.vertex, []):
-          for l_entry in adj.get(k_entry.vertex, []):
-            if i == k_entry.vertex or j_entry.vertex == l_entry.vertex or i == l_entry.vertex:
-              continue
-            # 모든 i -> j -> k -> l
-            temp = multiply_polys(
-              self._get_indicator_function(i, j_entry.vertex, j_entry.weight),
-              multiply_polys(
-                self._get_indicator_function(j_entry.vertex, k_entry.vertex, k_entry.weight),
-                self._get_indicator_function(k_entry.vertex, l_entry.vertex, l_entry.weight)
-              )
-            )
-            temp.scale(-1)
-            term3_polynomial.update(temp)
-    return term3_polynomial
-
+    term_n = BinaryPolynomial({}, Vartype.BINARY)
+    used_vertices = set()
+    for vertex in vertices:
+      initial_poly = BinaryPolynomial({(): 1.0}, Vartype.BINARY)
+      used_vertices.add(vertex)
+      temp = self._get_n_hop_polynomial(n_hop.n, vertex, adj, used_vertices, initial_poly)
+      used_vertices.remove(vertex)
+      term_n = add_polys(term_n, temp)
+    term_n.scale(n_hop.weight)
+    return term_n
 
   def _build_polynomial(
-      self, vertices: set[int], adj: dict[int, list[AdjEntry]], use_3hop_term: bool = True
+      self, vertices: set[int], adj: dict[int, list[AdjEntry]]
   ) -> BinaryPolynomial:
-    temp = self._get_2_hop_polynomial(vertices, adj)
-    if use_3hop_term:
-      temp.update(self._get_3_hop_polynomial(vertices, adj))
-    return temp
+    terms = BinaryPolynomial({}, Vartype.BINARY)
+    for n_hop in self.small_world_spec.n_hops:
+      temp = self._get_total_n_hop_polynomial(n_hop, vertices, adj)
+      terms = add_polys(terms, temp)
+    terms.scale(-1)
+    return terms
 
   def _process_solution(
       self, best_sample: dict[str, int], canonical_edges: list[WeightedEdge]
@@ -118,7 +128,7 @@ class WeightedSmallWorldService(WeightedOptimizationService):
     vertices = graph.get_vertices()
     adj = graph.get_adjacency_dict()
     canonical_edges = graph.edges
-    binary_polynomial = self._build_polynomial(vertices, adj, True)
+    binary_polynomial = self._build_polynomial(vertices, adj)
 
     sample_set = solve_binary_polynomial(binary_polynomial)
     return self._select_best_sample(sample_set, canonical_edges, vertices)

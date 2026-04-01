@@ -2,10 +2,17 @@ from fastapi import APIRouter, HTTPException
 
 from dto import WeightedRequestDto, ResponseDto
 from service import WeightedSmallWorldService
+from service.weighted_small_world_service import SmallWorldSpec, NHop
 
 router = APIRouter()
 
-small_world_service = WeightedSmallWorldService()
+small_world_service = WeightedSmallWorldService(
+  SmallWorldSpec(
+    n_hops=[
+      NHop(n=2, weight=1),
+      NHop(n=3, weight=1)
+    ])
+)
 
 @router.post("/api/v1/optimize/small-world", response_model=ResponseDto)
 async def optimize_by_small_world(request: WeightedRequestDto):

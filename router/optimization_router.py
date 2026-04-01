@@ -8,11 +8,23 @@ from service import (
     extract_vertices
 )
 from service.optimization_service import ProxyOptimizationService
-from service.weighted_small_world_service import WeightedSmallWorldService
+from service.weighted_small_world_service import (
+  WeightedSmallWorldService,
+  SmallWorldSpec,
+  NHop
+)
 
 router = APIRouter()
 
-small_world_service = ProxyOptimizationService(WeightedSmallWorldService())
+small_world_service = ProxyOptimizationService(
+  WeightedSmallWorldService(
+    SmallWorldSpec(
+      n_hops=[
+        NHop(n=2, weight=1),
+        NHop(n=3, weight=1),
+      ])
+  )
+)
 
 @router.post("/optimize/small-world", response_model=ResponseDto)
 async def optimize_graph_direction(request: RequestDto):

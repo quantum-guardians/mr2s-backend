@@ -65,7 +65,9 @@ class PolynomialOptimizationService(WeightedOptimizationService):
       graph: WeightedGraph
   ) -> list[tuple[int, int]]:
     """
-    Orchestrates the graph direction optimization process using the 'small-world' model.
+    Orchestrates the graph direction optimization process by composing the
+    configured PolynomialGenerators into a single QUBO polynomial, solving it,
+    and selecting the best directed-edge orientation from the resulting samples.
     """
     if graph.is_empty():
       return []

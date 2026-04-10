@@ -1,7 +1,16 @@
-from dimod import BinaryPolynomial, SampleSet, make_quadratic, BINARY
+from dimod import BinaryPolynomial, SampleSet, make_quadratic, BINARY, Vartype
 from dwave.samplers import SimulatedAnnealingSampler
 
 sampler = SimulatedAnnealingSampler()
+
+def get_indicator_function(i: int, j: int, weight: int) -> BinaryPolynomial:
+  if i == j:
+    raise ValueError(f"i and j must be different, but both are {i}")
+
+  if i < j:
+    return BinaryPolynomial({(): weight, (f'e_{i}_{j}', ): -weight}, Vartype.BINARY)
+  else:
+    return BinaryPolynomial({(f'e_{j}_{i}',): weight}, Vartype.BINARY)
 
 def solve_binary_polynomial(
     polynomial: BinaryPolynomial,

@@ -31,7 +31,7 @@ _MODULE_ATTRS = {
     ),
     "PolynomialGenerator": (".polynominal_generator", "PolynomialGenerator"),
     "PolynomialOptimizationService": (
-        ".weighted_small_world_service",
+        ".polynomial_optimization_service",
         "PolynomialOptimizationService",
     ),
     "SmallWorldSpec": (".minimize_sum_of_apsp_polynomial_generator", "SmallWorldSpec"),

@@ -22,7 +22,7 @@ _MODULE_ATTRS = {
     "WeightedOptimizationService": (".optimization_service", "WeightedOptimizationService"),
     "ProxyOptimizationService": (".optimization_service", "ProxyOptimizationService"),
     "FlowConservationPolynomialGenerator": (
-        ".flow_conservation_polynimial_generator",
+        ".flow_conservation_polynomial_generator",
         "FlowConservationPolynomialGenerator",
     ),
     "MinimizeSumOfApspPolynomialGenerator": (

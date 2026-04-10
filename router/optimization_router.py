@@ -5,24 +5,30 @@ from dto import RequestDto, ResponseDto, EdgeDto
 from service import (
     calculate_total_apsp_distance,
     optimize_edge_orientations,
-    extract_vertices
+    FlowConservationPolynomialGenerator,
+    MinimizeSumOfApspPolynomialGenerator,
+    SmallWorldSpec,
+    NHop,
+    ProxyOptimizationService,
+    PolynomialOptimizationService,
 )
-from service.optimization_service import ProxyOptimizationService
-from service.weighted_small_world_service import (
-  WeightedSmallWorldService,
-  SmallWorldSpec,
-  NHop
-)
+from utils import extract_vertices
 
 router = APIRouter()
 
 small_world_service = ProxyOptimizationService(
-  WeightedSmallWorldService(
-    SmallWorldSpec(
-      n_hops=[
-        NHop(n=2, weight=1),
-        NHop(n=3, weight=1),
-      ])
+  PolynomialOptimizationService(
+    [
+      FlowConservationPolynomialGenerator(),
+      MinimizeSumOfApspPolynomialGenerator(
+        SmallWorldSpec(
+          n_hops=[
+            NHop(n=2, weight=1),
+            NHop(n=3, weight=1)
+          ]
+        )
+      )
+    ]
   )
 )
 

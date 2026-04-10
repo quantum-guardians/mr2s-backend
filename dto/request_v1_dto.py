@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from domain.weighted_graph import WeightedEdge, WeightedGraph
+from domain import WeightedEdge, WeightedGraph
 
 @dataclass
 class WeightedEdgeDto:

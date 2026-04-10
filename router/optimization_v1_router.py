@@ -1,19 +1,29 @@
 from fastapi import APIRouter, HTTPException
 
 from dto import WeightedRequestDto, ResponseDto
-from service import WeightedSmallWorldService
-from service.weighted_small_world_service import SmallWorldSpec, NHop
+from service import (
+  FlowConservationPolynomialGenerator,
+  MinimizeSumOfApspPolynomialGenerator,
+  SmallWorldSpec,
+  NHop,
+  PolynomialOptimizationService,
+)
 
 router = APIRouter()
 
-small_world_service = WeightedSmallWorldService(
-  SmallWorldSpec(
-    n_hops=[
-      NHop(n=2, weight=1),
-      NHop(n=3, weight=1)
-    ])
+small_world_service = PolynomialOptimizationService(
+  [
+    FlowConservationPolynomialGenerator(),
+    MinimizeSumOfApspPolynomialGenerator(
+      SmallWorldSpec(
+        n_hops=[
+          NHop(n=2, weight=1),
+          NHop(n=3, weight=1)
+        ]
+      )
+    )
+  ]
 )
-
 @router.post("/api/v1/optimize/small-world", response_model=ResponseDto)
 async def optimize_by_small_world(request: WeightedRequestDto):
   """
@@ -26,14 +36,14 @@ async def optimize_by_small_world(request: WeightedRequestDto):
      bidirectional graph for comparison.
   4. Returns the final response including the graph and scores.
   """
-  # try:
-  graph = request.to_domain()
-  tuples = small_world_service.optimize(graph)
-  return ResponseDto.from_tuples(list(graph.get_vertices()), tuples)
-  # except ValueError as e:
-  #   raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
-  # except Exception as e:
-  #   raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
+  try:
+    graph = request.to_domain()
+    tuples = small_world_service.optimize(graph)
+    return ResponseDto.from_tuples(list(graph.get_vertices()), tuples)
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
 
 @router.post("/api/v1/optimize/naoto", response_model=ResponseDto)
 async def optimize_by_naoto(request: WeightedRequestDto):

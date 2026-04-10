@@ -2,36 +2,46 @@ from importlib import import_module
 from typing import Any
 
 __all__ = [
-    "WeightedSmallWorldService",
     "OptimizationService",
+    "WeightedOptimizationService",
+    "ProxyOptimizationService",
+    "FlowConservationPolynomialGenerator",
+    "MinimizeSumOfApspPolynomialGenerator",
+    "PolynomialGenerator",
+    "PolynomialOptimizationService",
+    "SmallWorldSpec",
+    "NHop",
+    "calculate_total_apsp_distance",
     "optimize_edge_orientations",
     "generate_connected_graph",
     "compute_planar_faces",
-    "calculate_total_apsp_distance",
-    "extract_vertices",
-    "to_canonical_edges",
-    "to_adjacency_dict",
-    "solve_binary_polynomial",
-    "multiply_polys",
-    "SmallWorldSpec",
-    "NHop",
 ]
 
 _MODULE_ATTRS = {
-    "WeightedSmallWorldService": (".weighted_small_world_service", "WeightedSmallWorldService"),
     "OptimizationService": (".optimization_service", "OptimizationService"),
-    "SmallWorldSpec": (".weighted_small_world_service", "SmallWorldSpec"),
-    "NHop": (".weighted_small_world_service", "NHop"),
+    "WeightedOptimizationService": (".optimization_service", "WeightedOptimizationService"),
+    "ProxyOptimizationService": (".optimization_service", "ProxyOptimizationService"),
+    "FlowConservationPolynomialGenerator": (
+        ".flow_conservation_polynimial_generator",
+        "FlowConservationPolynomialGenerator",
+    ),
+    "MinimizeSumOfApspPolynomialGenerator": (
+        ".minimize_sum_of_apsp_polynomial_generator",
+        "MinimizeSumOfApspPolynomialGenerator",
+    ),
+    "PolynomialGenerator": (".polynominal_generator", "PolynomialGenerator"),
+    "PolynomialOptimizationService": (
+        ".weighted_small_world_service",
+        "PolynomialOptimizationService",
+    ),
+    "SmallWorldSpec": (".minimize_sum_of_apsp_polynomial_generator", "SmallWorldSpec"),
+    "NHop": (".minimize_sum_of_apsp_polynomial_generator", "NHop"),
+    "calculate_total_apsp_distance": (".graph_analyzer", "calculate_total_apsp_distance"),
     "optimize_edge_orientations": (".naoto_service", "optimize_edge_orientations"),
     "generate_connected_graph": (".naoto_service", "generate_connected_graph"),
     "compute_planar_faces": (".naoto_service", "compute_planar_faces"),
-    "calculate_total_apsp_distance": (".graph_analyzer", "calculate_total_apsp_distance"),
-    "extract_vertices": (".graph_utils", "extract_vertices"),
-    "to_canonical_edges": (".graph_utils", "to_canonical_edges"),
-    "to_adjacency_dict": (".graph_utils", "to_adjacency_dict"),
-    "solve_binary_polynomial": (".qubo_utils", "solve_binary_polynomial"),
-    "multiply_polys": (".qubo_utils", "multiply_polys"),
 }
+
 
 def __getattr__(name: str) -> Any:
     """

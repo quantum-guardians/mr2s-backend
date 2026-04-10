@@ -26,7 +26,7 @@ def __getattr__(name: str) -> Any:
     """
     Lazily import attributes from submodules when accessed.
 
-    This avoids eagerly importing heavy dependencies when `service`
+    This avoids eagerly importing heavy dependencies when `utils`
     is imported, while preserving the public API.
     """
     try:

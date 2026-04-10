@@ -29,7 +29,7 @@ _MODULE_ATTRS = {
         ".minimize_sum_of_apsp_polynomial_generator",
         "MinimizeSumOfApspPolynomialGenerator",
     ),
-    "PolynomialGenerator": (".polynominal_generator", "PolynomialGenerator"),
+    "PolynomialGenerator": (".polynomial_generator", "PolynomialGenerator"),
     "PolynomialOptimizationService": (
         ".polynomial_optimization_service",
         "PolynomialOptimizationService",

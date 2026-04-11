@@ -9,7 +9,7 @@
 - 각각 generator가 생성한 다항식을 합쳐서 QUBO 식을 완성한 후 최적화를 진행합니다.
 
 #### [PolynomialGenerator](../service/polynomial_generator.py)
-- graph 정보를 맞아서 다항식을 리턴하는 형식의 abstract class입니다.
+- graph 정보를 받아서 다항식을 리턴하는 형식의 abstract class입니다.
 - 구현체
   - [FlowConservationPolynomialGenerator](../service/flow_conservation_polynomial_generator.py)
     - 흐름 보존을 위한 다항식을 리턴

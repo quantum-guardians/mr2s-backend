@@ -9,6 +9,8 @@ __all__ = [
     "multiply_polys",
     "add_polys",
     "get_indicator_function",
+    "with_timeout",
+    "TIME_OUT",
 ]
 
 _MODULE_ATTRS = {
@@ -19,6 +21,8 @@ _MODULE_ATTRS = {
     "multiply_polys": (".qubo_utils", "multiply_polys"),
     "add_polys": (".qubo_utils", "add_polys"),
     "get_indicator_function": (".qubo_utils", "get_indicator_function"),
+    "with_timeout": (".timeout", "with_timeout"),
+    "TIME_OUT": (".timeout", "TIME_OUT"),
 }
 
 

@@ -1,6 +1,7 @@
 import asyncio
 import functools
 import multiprocessing
+import queue
 
 from fastapi import HTTPException
 
@@ -21,6 +22,9 @@ def _run_in_process(fn, args, kwargs):
   Spawns a child process to execute fn(*args, **kwargs).
   Kills the process if it exceeds TIME_OUT seconds.
   Raises TimeoutError on timeout, or re-raises any exception from the child.
+
+  NOTE: Uses the 'fork' start method, which is only safe on Linux. This is
+  intentional – the service is deployed via the project's Linux-based Dockerfile.
   """
   ctx = multiprocessing.get_context("fork")
   result_queue = ctx.Queue()
@@ -36,15 +40,16 @@ def _run_in_process(fn, args, kwargs):
       process.join()
     raise TimeoutError()
 
-  if not result_queue.empty():
-    status, value = result_queue.get_nowait()
-    if status == "ok":
-      return value
-    raise value
+  try:
+    status, value = result_queue.get(block=False)
+  except queue.Empty:
+    raise RuntimeError(
+      f"Worker process exited unexpectedly with code {process.exitcode}"
+    )
 
-  raise RuntimeError(
-    f"Worker process exited unexpectedly with code {process.exitcode}"
-  )
+  if status == "ok":
+    return value
+  raise value
 
 
 def with_timeout(fn):

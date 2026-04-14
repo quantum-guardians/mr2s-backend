@@ -7,6 +7,8 @@ from service import (
   SmallWorldSpec,
   NHop,
   PolynomialOptimizationService,
+  NaotoService,
+  BruteForceService,
 )
 
 router = APIRouter()
@@ -24,7 +26,12 @@ small_world_service = PolynomialOptimizationService(
     )
   ]
 )
-@router.post("/api/v1/optimize/small-world", response_model=ResponseDto)
+
+naoto_service = NaotoService()
+
+brute_force_service = BruteForceService()
+
+@router.post("/api/v1/mr2s", response_model=ResponseDto)
 async def optimize_by_small_world(request: WeightedRequestDto):
   """
   API endpoint to optimize graph edge directions.
@@ -45,6 +52,24 @@ async def optimize_by_small_world(request: WeightedRequestDto):
   except Exception as e:
     raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
 
-@router.post("/api/v1/optimize/naoto", response_model=ResponseDto)
+@router.post("/api/v1/raw-sa", response_model=ResponseDto)
 async def optimize_by_naoto(request: WeightedRequestDto):
-  raise HTTPException(status_code=500, detail="Not implemented yet")
+  try:
+    graph = request.to_domain()
+    tuples = naoto_service.optimize(graph)
+    return ResponseDto.from_tuples(list(graph.get_vertices()), tuples)
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
+
+@router.post("/api/v1/brute-force", response_model=ResponseDto)
+async def optimize_brute_force(request: WeightedRequestDto):
+  try:
+    graph = request.to_domain()
+    tuples = brute_force_service.optimize(graph)
+    return ResponseDto.from_tuples(list(graph.get_vertices()), tuples)
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")

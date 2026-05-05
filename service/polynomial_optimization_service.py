@@ -7,7 +7,7 @@ from service import (
   WeightedOptimizationService,
   PolynomialGenerator,
 )
-from utils import solve_binary_polynomial, add_polys
+from utils import solve_binary_polynomial, build_bqm, add_polys
 
 
 @dataclass
@@ -60,6 +60,16 @@ class PolynomialOptimizationService(WeightedOptimizationService):
 
 
   # --- Public Service Function ---
+  def get_bqm(self, graph: WeightedGraph):
+    """
+    Builds the BQM (Binary Quadratic Model) for the given graph
+    without solving it. Useful for embedding analysis and qubit estimation.
+    """
+    if graph.is_empty():
+      raise ValueError("Cannot build BQM from an empty graph")
+    binary_polynomial = self._build_polynomial(graph)
+    return build_bqm(binary_polynomial)
+
   def optimize(
       self,
       graph: WeightedGraph

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from dto import WeightedRequestDto, ResponseDto
+from dto import WeightedRequestDto, ResponseDto, EstimateResponseDto
 from service import (
   FlowConservationPolynomialGenerator,
   MinimizeSumOfApspPolynomialGenerator,
@@ -10,7 +10,7 @@ from service import (
   NaotoService,
   BruteForceService,
 )
-from utils import run_with_timeout
+from utils import run_with_timeout, estimate_required_qubits
 
 router = APIRouter()
 
@@ -71,3 +71,15 @@ async def optimize_brute_force(request: WeightedRequestDto):
     raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
   except Exception as e:
     raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
+
+@router.post("/api/v1/mr2s/estimate", response_model=EstimateResponseDto)
+async def estimate_qubits(request: WeightedRequestDto):
+  try:
+    graph = request.to_domain()
+    bqm = small_world_service.get_bqm(graph)
+    result = estimate_required_qubits(bqm)
+    return EstimateResponseDto(**result)
+  except ValueError as e:
+    raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
+  except Exception as e:
+    raise HTTPException(status_code=500, detail=f"Estimation failed: {e}")

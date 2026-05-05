@@ -12,6 +12,18 @@ def get_indicator_function(i: int, j: int, weight: int) -> BinaryPolynomial:
   else:
     return BinaryPolynomial({(f'e_{j}_{i}',): weight}, Vartype.BINARY)
 
+def build_bqm(polynomial: BinaryPolynomial):
+  """
+  Converts a higher-order BinaryPolynomial into a quadratic BQM
+  suitable for sampling or embedding analysis.
+  """
+  from dimod import BinaryQuadraticModel
+  coeffs = [abs(v) for k, v in polynomial.items() if k != ()]
+  max_coeff = max(coeffs) if coeffs else 1.0
+  bqm: BinaryQuadraticModel = make_quadratic(polynomial, strength=max_coeff * 2.0, vartype=BINARY)
+  return bqm
+
+
 def solve_binary_polynomial(
     polynomial: BinaryPolynomial,
     num_reads: int = 100
@@ -19,13 +31,7 @@ def solve_binary_polynomial(
   """
   Solves the given QUBO problem using a simulated annealer.
   """
-  coeffs = [abs(v) for k, v in polynomial.items() if k != ()]
-  max_coeff = max(coeffs) if coeffs else 1.0
-
-  # 2. 보통 최대 계수의 1.5 ~ 2배 정도를 주면 안전합니다.
-  # 이 값을 strength로 전달합니다.
-  bqm = make_quadratic(polynomial, strength=max_coeff * 2.0, vartype=BINARY)
-
+  bqm = build_bqm(polynomial)
   return sampler.sample(bqm, num_reads=num_reads)
 
 def multiply_polys(

@@ -6,9 +6,11 @@ __all__ = [
     "to_canonical_edges",
     "to_adjacency_dict",
     "solve_binary_polynomial",
+    "build_bqm",
     "multiply_polys",
     "add_polys",
     "get_indicator_function",
+    "estimate_required_qubits",
     "run_with_timeout",
     "TIME_OUT",
 ]
@@ -18,9 +20,11 @@ _MODULE_ATTRS = {
     "to_canonical_edges": (".graph_utils", "to_canonical_edges"),
     "to_adjacency_dict": (".graph_utils", "to_adjacency_dict"),
     "solve_binary_polynomial": (".qubo_utils", "solve_binary_polynomial"),
+    "build_bqm": (".qubo_utils", "build_bqm"),
     "multiply_polys": (".qubo_utils", "multiply_polys"),
     "add_polys": (".qubo_utils", "add_polys"),
     "get_indicator_function": (".qubo_utils", "get_indicator_function"),
+    "estimate_required_qubits": (".embedding_utils", "estimate_required_qubits"),
     "run_with_timeout": (".timeout", "run_with_timeout"),
     "TIME_OUT": (".timeout", "TIME_OUT"),
 }

@@ -1,1 +1,1 @@
-# Quantum_Hackathon_in_Korea
+# MR2S simulation backend

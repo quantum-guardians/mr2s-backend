@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from domain import WeightedGraph, WeightedEdge
+
+import mr2s_module
+
+from domain import WeightedGraph
 
 
 class WeightedOptimizationService(ABC):
@@ -9,26 +12,10 @@ class WeightedOptimizationService(ABC):
   def optimize(self, graph: WeightedGraph) -> list[tuple[int, int]]:
     pass
 
-class OptimizationService(ABC):
-
-  @abstractmethod
-  def optimize(
-      self,
-      vertices: set[int],
-      edges: list[list[int]]
-  ) -> list[tuple[int, int]]:
-    pass
-
 @dataclass
-class ProxyOptimizationService(OptimizationService):
+class ProxyModuleOptimizationService(WeightedOptimizationService):
+  mr2s_solver: mr2s_module.QuboMR2SSolver
 
-  weighted_optimization_service: WeightedOptimizationService
-
-  def optimize(
-      self,
-      vertices: set[int],
-      edges: list[list[int]]
-  ) -> list[tuple[int, int]]:
-    edge_list = [WeightedEdge(vertices=edge, weight=1) for edge in edges]
-    graph = WeightedGraph(edges=edge_list)
-    return self.weighted_optimization_service.optimize(graph)
+  def optimize(self, graph: WeightedGraph) -> list[tuple[int, int]]:
+    solution = self.mr2s_solver.run(graph.to_mr2s_graph())
+    return list(solution.edges)

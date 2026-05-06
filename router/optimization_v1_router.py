@@ -2,31 +2,13 @@ from fastapi import APIRouter, HTTPException
 
 from dto import WeightedRequestDto, ResponseDto
 from service import (
-  FlowConservationPolynomialGenerator,
-  MinimizeSumOfApspPolynomialGenerator,
-  SmallWorldSpec,
-  NHop,
-  PolynomialOptimizationService,
   NaotoService,
   BruteForceService,
 )
+from service.module_optimization_service import NONE_FACE_CYCLE_OPTIMIZATION_SERVICE
 from utils import run_with_timeout
 
 router = APIRouter()
-
-small_world_service = PolynomialOptimizationService(
-  [
-    FlowConservationPolynomialGenerator(),
-    MinimizeSumOfApspPolynomialGenerator(
-      SmallWorldSpec(
-        n_hops=[
-          NHop(n=2, weight=1),
-          NHop(n=3, weight=1)
-        ]
-      )
-    )
-  ]
-)
 
 naoto_service = NaotoService()
 
@@ -40,7 +22,11 @@ def _run_optimization(service, graph):
 async def optimize_by_small_world(request: WeightedRequestDto):
   try:
     graph = request.to_domain()
-    return await run_with_timeout(_run_optimization, small_world_service, graph)
+    return await run_with_timeout(
+      _run_optimization,
+      NONE_FACE_CYCLE_OPTIMIZATION_SERVICE,
+      graph,
+    )
   except HTTPException:
     raise
   except ValueError as e:

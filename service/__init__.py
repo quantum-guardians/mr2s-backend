@@ -1,43 +1,10 @@
 from importlib import import_module
 from typing import Any
 
-__all__ = [
-    "OptimizationService",
-    "WeightedOptimizationService",
-    "ProxyOptimizationService",
-    "FlowConservationPolynomialGenerator",
-    "MinimizeSumOfApspPolynomialGenerator",
-    "PolynomialGenerator",
-    "PolynomialOptimizationService",
-    "SmallWorldSpec",
-    "NHop",
-    "calculate_total_apsp_distance",
-    "BruteForceService",
-    "NaotoService",
-    "optimize_edge_orientations",
-    "generate_connected_graph",
-    "compute_planar_faces",
-]
-
 _MODULE_ATTRS = {
-    "OptimizationService": (".optimization_service", "OptimizationService"),
     "WeightedOptimizationService": (".optimization_service", "WeightedOptimizationService"),
-    "ProxyOptimizationService": (".optimization_service", "ProxyOptimizationService"),
-    "FlowConservationPolynomialGenerator": (
-        ".flow_conservation_polynomial_generator",
-        "FlowConservationPolynomialGenerator",
-    ),
-    "MinimizeSumOfApspPolynomialGenerator": (
-        ".minimize_sum_of_apsp_polynomial_generator",
-        "MinimizeSumOfApspPolynomialGenerator",
-    ),
-    "PolynomialGenerator": (".polynomial_generator", "PolynomialGenerator"),
-    "PolynomialOptimizationService": (
-        ".polynomial_optimization_service",
-        "PolynomialOptimizationService",
-    ),
-    "SmallWorldSpec": (".minimize_sum_of_apsp_polynomial_generator", "SmallWorldSpec"),
-    "NHop": (".minimize_sum_of_apsp_polynomial_generator", "NHop"),
+    "ProxyModuleOptimizationService": (".optimization_service", "ProxyModuleOptimizationService"),
+    "NONE_FACE_CYCLE_OPTIMIZATION_SERVICE": (".module_optimization_service", "NONE_FACE_CYCLE_OPTIMIZATION_SERVICE"),
     "calculate_total_apsp_distance": (".graph_analyzer", "calculate_total_apsp_distance"),
     "BruteForceService": (".bruteforce_service", "BruteForceService"),
     "NaotoService": (".naoto_service", "NaotoService"),

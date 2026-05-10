@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from router import optimization_router, optimization_v1_router
+from router import optimization_v1_router
 
 app = FastAPI()
 
@@ -17,7 +17,6 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-app.include_router(optimization_router)
 app.include_router(optimization_v1_router)
 
 @app.get("/")

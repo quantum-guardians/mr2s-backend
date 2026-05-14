@@ -34,7 +34,7 @@ async def optimize_by_small_world(request: WeightedRequestDto):
     raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
 
 @router.post("/api/v1/raw-sa", response_model=ResponseDto)
-async def optimize_by_naoto(request: WeightedRequestDto):
+async def optimize_by_raw_sa(request: WeightedRequestDto):
   try:
     graph = request.to_domain()
     return await run_with_timeout(_run_optimization, RAW_SA_OPTIMIZATION_SERVICE, graph)

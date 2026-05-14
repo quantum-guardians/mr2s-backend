@@ -5,6 +5,7 @@ _MODULE_ATTRS = {
     "WeightedOptimizationService": (".optimization_service", "WeightedOptimizationService"),
     "ProxyModuleOptimizationService": (".optimization_service", "ProxyModuleOptimizationService"),
     "NONE_FACE_CYCLE_OPTIMIZATION_SERVICE": (".module_optimization_service", "NONE_FACE_CYCLE_OPTIMIZATION_SERVICE"),
+    "ModuleSolverProtocol": (".module_solver_protocol", "ModuleSolverProtocol"),
     "calculate_total_apsp_distance": (".graph_analyzer", "calculate_total_apsp_distance"),
     "BruteForceService": (".bruteforce_service", "BruteForceService"),
     "NaotoService": (".naoto_service", "NaotoService"),

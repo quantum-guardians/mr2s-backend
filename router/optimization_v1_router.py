@@ -2,15 +2,14 @@ from fastapi import APIRouter, HTTPException
 
 from dto import WeightedRequestDto, ResponseDto
 from service import (
-  NaotoService,
   BruteForceService,
 )
-from service.module_optimization_service import NONE_FACE_CYCLE_OPTIMIZATION_SERVICE
+from service.module_optimization_service import \
+  NONE_FACE_CYCLE_OPTIMIZATION_SERVICE, RAW_SA_OPTIMIZATION_SERVICE
 from utils import run_with_timeout
 
-router = APIRouter()
 
-naoto_service = NaotoService()
+router = APIRouter()
 
 brute_force_service = BruteForceService()
 
@@ -35,10 +34,10 @@ async def optimize_by_small_world(request: WeightedRequestDto):
     raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")
 
 @router.post("/api/v1/raw-sa", response_model=ResponseDto)
-async def optimize_by_naoto(request: WeightedRequestDto):
+async def optimize_by_raw_sa(request: WeightedRequestDto):
   try:
     graph = request.to_domain()
-    return await run_with_timeout(_run_optimization, naoto_service, graph)
+    return await run_with_timeout(_run_optimization, RAW_SA_OPTIMIZATION_SERVICE, graph)
   except HTTPException:
     raise
   except ValueError as e:

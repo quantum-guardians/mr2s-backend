@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from mr2s_module import Graph, Solution
+from mr2s_module.domain import Graph, Solution
 
 
 class ModuleSolverProtocol(Protocol):

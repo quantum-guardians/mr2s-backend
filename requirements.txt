@@ -1,5 +1,5 @@
 fastapi==0.133.0
-mr2s-module==0.0.6
+mr2s-module==0.1.7
 networkx
 numpy
 pydantic==2.12.5

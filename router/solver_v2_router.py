@@ -8,6 +8,7 @@ from service.solver_catalog import (
   SolverUnavailableError,
   UnknownSolverError,
   create_optimization_service,
+  unsolvable_graph_detail,
 )
 from utils import run_with_timeout
 
@@ -58,4 +59,9 @@ async def optimize_by_solver(solver_name: str, request: SolverRequestDto):
   except ValueError as e:
     raise HTTPException(status_code=400, detail=f"Invalid input: {e}")
   except Exception as e:
+    # A solver that cannot handle this particular graph is a property of the
+    # request, not a server fault, so it must not read as 5xx to the client.
+    detail = unsolvable_graph_detail(solver_name, e)
+    if detail is not None:
+      raise HTTPException(status_code=422, detail=detail)
     raise HTTPException(status_code=500, detail=f"Optimization failed: {e}")

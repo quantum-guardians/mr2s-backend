@@ -180,6 +180,7 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 | `400 Bad Request` | Invalid input (malformed edges, missing fields), an option the solver does not accept, or `robin` on a graph with a bridge |
 | `404 Not Found` | Unknown `solver_name`; the message lists valid names |
 | `408 Request Timeout` | Optimization exceeded the 10-second time limit |
+| `422 Unprocessable Entity` | The solver cannot handle this graph — `qubo` on a graph too dense to split into QUBO-embeddable subgraphs. The message names the other solvers; `raw-sa` orients these |
 | `500 Internal Server Error` | Solver ran but failed |
 | `503 Service Unavailable` | Solver could not be constructed — e.g. missing D-Wave credentials |
 
@@ -190,7 +191,7 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 | Name | Aliases | Method | Options | Needs D-Wave |
 |------|---------|--------|---------|--------------|
 | `raw-sa` | `sa` | Simulated annealing directly on graph metrics (APSP + flow), no QUBO | SA options | No |
-| `qubo` | `dnc-qubo`, `dnc-qubo-sa` | Divide-and-conquer partitioning, subgraphs solved as QUBO with a local SA sampler | — | No |
+| `qubo` | `dnc-qubo`, `dnc-qubo-sa` | Divide-and-conquer partitioning, subgraphs solved as QUBO with a local SA sampler. Dense graphs can fail to partition and return `422` | — | No |
 | `robin` | `robbin` | Robbins orientation — single DFS pass that orients every edge | — | No |
 
 ### Options

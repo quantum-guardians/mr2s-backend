@@ -100,6 +100,33 @@ SOLVER_ALIASES: dict[str, str] = {
 }
 
 
+# The divide-and-conquer QUBO solver raises a plain RuntimeError when it cannot
+# cut a graph into embeddable subgraphs, so the message prefix is the only
+# marker available. A typed exception is tracked upstream in
+# quantum-guardians/mr2s-module#78; switch to it once released.
+PARTITION_FAILURE_PREFIX = "DnC partition failed"
+
+
+def unsolvable_graph_detail(solver_name: str, error: Exception) -> str | None:
+  """Describes `error` as a graph the solver cannot handle.
+
+  Returns None when the error is a genuine server failure (the caller should
+  keep reporting those as 5xx).
+  """
+  if not str(error).startswith(PARTITION_FAILURE_PREFIX):
+    return None
+
+  canonical_name = SOLVER_ALIASES.get(solver_name, solver_name)
+  alternatives = ", ".join(
+    f"'{name}'" for name in sorted(SOLVER_SPECS) if name != canonical_name
+  )
+  return (
+    f"Solver '{canonical_name}' cannot orient this graph: it is too dense to "
+    f"split into QUBO-embeddable subgraphs. Try another solver ({alternatives}) "
+    f"or send a sparser graph. Underlying error: {error}"
+  )
+
+
 def resolve_solver_spec(name: str) -> SolverSpec:
   canonical_name = SOLVER_ALIASES.get(name, name)
   spec = SOLVER_SPECS.get(canonical_name)

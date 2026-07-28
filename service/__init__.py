@@ -15,6 +15,7 @@ _MODULE_ATTRS = {
     "SolverSpec": (".solver_catalog", "SolverSpec"),
     "create_optimization_service": (".solver_catalog", "create_optimization_service"),
     "resolve_solver_spec": (".solver_catalog", "resolve_solver_spec"),
+    "unsolvable_graph_detail": (".solver_catalog", "unsolvable_graph_detail"),
     "UnknownSolverError": (".solver_catalog", "UnknownSolverError"),
     "InvalidSolverOptionError": (".solver_catalog", "InvalidSolverOptionError"),
     "SolverUnavailableError": (".solver_catalog", "SolverUnavailableError"),

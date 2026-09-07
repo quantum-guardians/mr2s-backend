@@ -63,7 +63,7 @@ Returns every solver the backend can run, together with the per-solver options i
 [
   {
     "name": "raw-sa",
-    "description": "Simulated annealing over graph metrics (APSP + flow), no QUBO.",
+    "description": "Simulated annealing over graph metrics (APSP + flow), no QUBO. Degree-2 chains are contracted before solving.",
     "options": [
       "apsp_weight",
       "disconnected_pair_penalty",
@@ -77,14 +77,14 @@ Returns every solver the backend can run, together with the per-solver options i
   },
   {
     "name": "qubo",
-    "description": "Divide-and-conquer partitioning, subgraphs solved as QUBO with a local simulated annealing sampler.",
+    "description": "Divide-and-conquer partitioning, subgraphs solved as QUBO with a local simulated annealing sampler. Degree-2 chains are contracted when the contracted graph still partitions.",
     "options": [],
     "requires_dwave_credentials": false,
     "aliases": ["dnc-qubo", "dnc-qubo-sa"]
   },
   {
     "name": "robin",
-    "description": "Robbins orientation: a DFS pass that orients every edge at once. Deterministic and fast, but returns no edges when the graph has a bridge.",
+    "description": "Robbins orientation: a DFS pass that orients every edge at once. Degree-2 chains are contracted before solving. Deterministic and fast, but fails when the graph has a bridge.",
     "options": [],
     "requires_dwave_credentials": false,
     "aliases": ["robbin"]
@@ -187,11 +187,11 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 
 ## Solvers
 
-| Name | Aliases | Method | Options | Needs D-Wave |
-|------|---------|--------|---------|--------------|
-| `raw-sa` | `sa` | Simulated annealing directly on graph metrics (APSP + flow), no QUBO | SA options | No |
-| `qubo` | `dnc-qubo`, `dnc-qubo-sa` | Divide-and-conquer partitioning, subgraphs solved as QUBO with a local SA sampler | — | No |
-| `robin` | `robbin` | Robbins orientation — single DFS pass that orients every edge | — | No |
+| Name | Aliases | Method | Options | Needs D-Wave | Chain contraction |
+|------|---------|--------|---------|--------------|-------------------|
+| `raw-sa` | `sa` | Simulated annealing directly on graph metrics (APSP + flow), no QUBO | SA options | No | Yes |
+| `qubo` | `dnc-qubo`, `dnc-qubo-sa` | Divide-and-conquer partitioning, subgraphs solved as QUBO with a local SA sampler | — | No | When it partitions — see below |
+| `robin` | `robbin` | Robbins orientation — single DFS pass that orients every edge | — | No | Yes |
 
 ### Options
 
@@ -208,9 +208,15 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 
 `qubo` and `robin` take no options and reject any `options` key with `400`. `GET /api/v2/solvers` is the authoritative list.
 
+### Chain contraction
+
+`mr2s-module` contracts degree-2 chains into single super edges before solving and lifts the directions back onto the original edges afterwards. Fewer variables means a larger graph fits inside the 10-second deadline. It is on by default and is not exposed as a request option; the response shape is unaffected, because the lifted solution always names the original edges.
+
+`qubo` needs one extra step. Contraction raises the degeneracy of the QUBO interaction graph, which can push a graph past the DnC embedding prefilter it previously passed — the 28-edge sample in `docs/test.md` goes from degeneracy 8 (accepted) to 11 (rejected), and the face-cycle fallback then finds no partition ([mr2s-module#90](https://github.com/quantum-guardians/mr2s-module/issues/90)). So `qubo` tries the contracted graph first and retries the original one when partitioning fails. The prefilter decides before any sampling, so the discarded attempt costs about 130 ms; on the 28-edge sample the whole request takes roughly 1.1 s. Graphs that do partition after contraction keep the benefit.
+
 ### `raw-sa` (alias `sa`)
 
-- `mr2s-module`'s `SAMR2SSolver` — no QUBO; graph metrics are evaluated directly
+- `mr2s-module`'s `SAMR2SSolver` behind the chain contraction presolve — no QUBO; graph metrics are evaluated directly
 - Randomly initializes edge directions, then flips single edges under the Metropolis criterion
 - Cost combines a weighted APSP term (`apsp_weight`), a flow-conservation term (`flow_weight`), and a penalty per unreachable vertex pair (`disconnected_pair_penalty`)
 - Runs `num_restarts` independent restarts and keeps the best
@@ -221,6 +227,7 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 
 - `mr2s-module`'s `DnCMr2sSolver` built on a QUBO inner solver (`create_dnc_qubo_sa_solver`)
 - Partitions the graph by degeneracy pruning, solves each subgraph as a QUBO, then merges the orientations
+- Contracts degree-2 chains first and falls back to the original graph when the contracted one does not partition
 - Inner QUBO variable encoding: `e_i_j = 0` → direction `i → j`, `e_i_j = 1` → direction `j → i`
 - Samples via D-Wave's local `SimulatedAnnealingSampler`, so no credentials are needed
 - Probabilistic — results may vary between runs
@@ -228,7 +235,7 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 
 ### `robin` (alias `robbin`)
 
-- `mr2s-module`'s `Robbin` — an `EdgeOrientationProtocol`, not an MR2S solver; the backend wraps it so it can be called like one
+- `mr2s-module`'s `RobbinMR2SSolver` behind the chain contraction presolve (`create_robbin_solver`)
 - Single DFS pass following Robbins' theorem: every edge is oriented at once, no search and no sampling
 - Deterministic and by far the fastest option; useful as a baseline
 - A bridge in the graph makes a strongly connected orientation impossible — the request then fails with `400`:
@@ -247,6 +254,7 @@ curl -X POST http://localhost:8000/api/v2/solvers/qubo -H 'Content-Type: applica
 | **Edge weights** | Used | Used | Ignored |
 | **Deterministic** | No (unless `random_seed` set) | No | Yes |
 | **Tunable** | 6 SA options | — | — |
+| **Chain contraction** | Yes | When it partitions | Yes |
 | **Speed** | Moderate | Slowest | Fastest |
 | **Fails when** | — | No valid partition | Graph has a bridge |
 
@@ -277,7 +285,7 @@ Unchanged and still supported. Each runs one fixed solver and ignores any `optio
 
 | Endpoint | Solver | v2 equivalent |
 |----------|--------|---------------|
-| `POST /api/v1/mr2s` | `create_qubo_solver` — QUBO + local SA, no partitioning | Closest: `POST /api/v2/solvers/qubo` (adds DnC partitioning) |
+| `POST /api/v1/mr2s` | `create_qubo_solver` — QUBO + local SA, no partitioning, chain contraction on | Closest: `POST /api/v2/solvers/qubo` (adds DnC partitioning) |
 | `POST /api/v1/raw-sa` | `create_sa_solver` | `POST /api/v2/solvers/raw-sa` |
 | `POST /api/v1/brute-force` | Backend-local exhaustive 2^E search | Not exposed in v2 |
 

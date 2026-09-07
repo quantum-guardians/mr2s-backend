@@ -54,12 +54,23 @@ def _module_solver_service(factory_name: str) -> Callable[..., WeightedOptimizat
   return build
 
 
+def _dnc_qubo_service(**_: Any) -> WeightedOptimizationService:
+  from mr2s_module import create_dnc_qubo_sa_solver
+
+  from service.optimization_service import ContractionFallbackService
+
+  return ContractionFallbackService(
+    contracted=create_dnc_qubo_sa_solver(use_reduction=True),
+    plain=create_dnc_qubo_sa_solver(use_reduction=False),
+  )
+
+
 def _robbin_service(**_: Any) -> WeightedOptimizationService:
-  from mr2s_module import Robbin
+  from mr2s_module import create_robbin_solver
 
-  from service.edge_orientation_service import ProxyEdgeOrientationService
+  from service.edge_orientation_service import RobbinOptimizationService
 
-  return ProxyEdgeOrientationService(Robbin())
+  return RobbinOptimizationService(create_robbin_solver())
 
 
 SOLVER_SPECS: dict[str, SolverSpec] = {
@@ -68,7 +79,8 @@ SOLVER_SPECS: dict[str, SolverSpec] = {
     SolverSpec(
       name="raw-sa",
       description=(
-        "Simulated annealing over graph metrics (APSP + flow), no QUBO."
+        "Simulated annealing over graph metrics (APSP + flow), no QUBO. "
+        "Degree-2 chains are contracted before solving."
       ),
       build_service=_module_solver_service("create_sa_solver"),
       option_names=_SIMULATED_ANNEALING_OPTIONS,
@@ -77,15 +89,17 @@ SOLVER_SPECS: dict[str, SolverSpec] = {
       name="qubo",
       description=(
         "Divide-and-conquer partitioning, subgraphs solved as QUBO with "
-        "a local simulated annealing sampler."
+        "a local simulated annealing sampler. Degree-2 chains are contracted "
+        "when the contracted graph still partitions."
       ),
-      build_service=_module_solver_service("create_dnc_qubo_sa_solver"),
+      build_service=_dnc_qubo_service,
     ),
     SolverSpec(
       name="robin",
       description=(
         "Robbins orientation: a DFS pass that orients every edge at once. "
-        "Deterministic and fast, but returns no edges when the graph has a bridge."
+        "Degree-2 chains are contracted before solving. Deterministic and "
+        "fast, but fails when the graph has a bridge."
       ),
       build_service=_robbin_service,
     ),

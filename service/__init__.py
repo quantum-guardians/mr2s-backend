@@ -9,7 +9,7 @@ _MODULE_ATTRS = {
     "BruteForceService": (".bruteforce_service", "BruteForceService"),
     "NONE_FACE_CYCLE_OPTIMIZATION_SERVICE": (".module_optimization_service", "NONE_FACE_CYCLE_OPTIMIZATION_SERVICE"),
     "RAW_SA_OPTIMIZATION_SERVICE": (".module_optimization_service", "RAW_SA_OPTIMIZATION_SERVICE"),
-    "ProxyEdgeOrientationService": (".edge_orientation_service", "ProxyEdgeOrientationService"),
+    "RobbinOptimizationService": (".edge_orientation_service", "RobbinOptimizationService"),
     "SOLVER_SPECS": (".solver_catalog", "SOLVER_SPECS"),
     "SOLVER_ALIASES": (".solver_catalog", "SOLVER_ALIASES"),
     "SolverSpec": (".solver_catalog", "SolverSpec"),

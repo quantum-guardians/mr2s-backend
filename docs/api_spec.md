@@ -45,7 +45,9 @@ GET /
 GET /api/v2/solvers
 ```
 
-Returns every solver the backend can run, together with the per-solver options it accepts. Drive the client's solver picker from this response instead of hardcoding names.
+Returns every solver the backend can run, the per-solver options it accepts, and the request that runs it. Drive the client's solver picker from this response instead of hardcoding names: `method` and `endpoint` are ready to call as they stand, so no client needs to know the `/api/v2/solvers/{name}` rule.
+
+For the full route list, including v1 and the health check, use FastAPI's own `GET /openapi.json` or the browsable `GET /docs`.
 
 **Response `200`** — `SolverInfo[]`
 
@@ -53,6 +55,9 @@ Returns every solver the backend can run, together with the per-solver options i
 |-------|------|-------------|
 | `name` | `string` | Canonical solver name, used as the path parameter |
 | `description` | `string` | What the solver does |
+| `method` | `string` | HTTP method for `endpoint` — always `POST` |
+| `endpoint` | `string` | Path that runs this solver; send the request body below to it |
+| `alias_endpoints` | `string[]` | Paths for the aliases; each behaves exactly like `endpoint` |
 | `options` | `string[]` | Option keys accepted in the request `options` object |
 | `requires_dwave_credentials` | `bool` | `true` when the solver needs `DWAVE_API_TOKEN` (or `~/.config/dwave/dwave.conf`) |
 | `aliases` | `string[]` | Alternative names accepted on the path |
@@ -64,6 +69,9 @@ Returns every solver the backend can run, together with the per-solver options i
   {
     "name": "raw-sa",
     "description": "Simulated annealing over graph metrics (APSP + flow), no QUBO.",
+    "method": "POST",
+    "endpoint": "/api/v2/solvers/raw-sa",
+    "alias_endpoints": ["/api/v2/solvers/sa"],
     "options": [
       "apsp_weight",
       "disconnected_pair_penalty",
@@ -78,6 +86,9 @@ Returns every solver the backend can run, together with the per-solver options i
   {
     "name": "qubo",
     "description": "Divide-and-conquer partitioning, subgraphs solved as QUBO with a local simulated annealing sampler.",
+    "method": "POST",
+    "endpoint": "/api/v2/solvers/qubo",
+    "alias_endpoints": ["/api/v2/solvers/dnc-qubo", "/api/v2/solvers/dnc-qubo-sa"],
     "options": [],
     "requires_dwave_credentials": false,
     "aliases": ["dnc-qubo", "dnc-qubo-sa"]
@@ -85,6 +96,9 @@ Returns every solver the backend can run, together with the per-solver options i
   {
     "name": "robin",
     "description": "Robbins orientation: a DFS pass that orients every edge at once. Deterministic and fast, but returns no edges when the graph has a bridge.",
+    "method": "POST",
+    "endpoint": "/api/v2/solvers/robin",
+    "alias_endpoints": ["/api/v2/solvers/robbin"],
     "options": [],
     "requires_dwave_credentials": false,
     "aliases": ["robbin"]
@@ -329,6 +343,9 @@ Allowed headers: `Content-Type`, `Authorization`
 |-------|------|-------------|
 | `name` | `string` | Canonical solver name |
 | `description` | `string` | Human-readable summary |
+| `method` | `string` | HTTP method for `endpoint` |
+| `endpoint` | `string` | Path that runs this solver |
+| `alias_endpoints` | `string[]` | Paths for the aliases |
 | `options` | `string[]` | Accepted option keys |
 | `requires_dwave_credentials` | `boolean` | Whether D-Wave credentials are required |
 | `aliases` | `string[]` | Alternative names accepted on the path |

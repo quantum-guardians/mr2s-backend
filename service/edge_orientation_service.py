@@ -1,39 +1,29 @@
 from dataclasses import dataclass
-from typing import Protocol
-
-from mr2s_module.domain import Edge, Graph
 
 from domain import WeightedGraph
-from service.optimization_service import WeightedOptimizationService
+from service import ModuleSolverProtocol
+from service.optimization_service import ProxyModuleOptimizationService
 
-
-class EdgeOrientationProtocol(Protocol):
-  def run(self, graph: Graph):
-    ...
+BRIDGE_MESSAGE = (
+  "no orientation found: the graph has a bridge, so no strongly "
+  "connected orientation exists"
+)
 
 
 @dataclass
-class ProxyEdgeOrientationService(WeightedOptimizationService):
-  """Adapts an mr2s_module edge-orientation algorithm to the service interface.
+class RobbinOptimizationService(ProxyModuleOptimizationService):
+  """Runs the Robbins solver and reports the bridge case in API terms.
 
-  Orientation algorithms return `OrientedEdges` (directed `Edge` objects) rather
-  than the `Solution` (edge tuples) produced by the MR2S solvers.
+  `Robbin` returns no oriented edges when the graph has a bridge, and the
+  `RobbinMR2SSolver` wrapper around it turns that into a `ValueError` naming the
+  first edge it could not orient. That is the only way this solver fails, so the
+  message is rewritten into the bridge explanation the API has always returned.
   """
 
-  orientation: EdgeOrientationProtocol
+  mr2s_solver: ModuleSolverProtocol
 
   def optimize(self, graph: WeightedGraph) -> list[tuple[int, int]]:
-    result = self.orientation.run(graph.to_mr2s_graph())
-    edges = result.get_edges()
-    if not edges and not graph.is_empty():
-      raise ValueError(
-        "no orientation found: the graph has a bridge, so no strongly "
-        "connected orientation exists"
-      )
-    return [self._to_tuple(edge) for edge in edges]
-
-  @staticmethod
-  def _to_tuple(edge: Edge) -> tuple[int, int]:
-    # `Edge.vertices` is (tail, head) once the edge is directed.
-    tail, head = edge.vertices
-    return tail, head
+    try:
+      return super().optimize(graph)
+    except ValueError as e:
+      raise ValueError(BRIDGE_MESSAGE) from e

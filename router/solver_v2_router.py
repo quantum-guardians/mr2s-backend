@@ -13,6 +13,12 @@ from utils import run_with_timeout
 
 router = APIRouter(prefix="/api/v2/solvers", tags=["solvers"])
 
+SOLVER_METHOD = "POST"
+
+
+def _endpoint_of(name: str) -> str:
+  return f"{router.prefix}/{name}"
+
 
 def _run_optimization(service, graph):
   tuples = service.optimize(graph)
@@ -31,6 +37,9 @@ async def list_solvers():
     SolverInfoDto(
       name=spec.name,
       description=spec.description,
+      method=SOLVER_METHOD,
+      endpoint=_endpoint_of(spec.name),
+      alias_endpoints=[_endpoint_of(alias) for alias in _aliases_of(spec.name)],
       options=sorted(spec.option_names),
       requires_dwave_credentials=spec.requires_dwave_credentials,
       aliases=_aliases_of(spec.name),

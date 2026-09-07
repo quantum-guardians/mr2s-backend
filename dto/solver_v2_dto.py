@@ -18,6 +18,9 @@ class SolverRequestDto:
 class SolverInfoDto:
   name: str
   description: str
+  method: str
+  endpoint: str
+  alias_endpoints: list[str]
   options: list[str]
   requires_dwave_credentials: bool
   aliases: list[str]
